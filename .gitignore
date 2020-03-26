@@ -109,6 +109,4 @@ venv.bak/
 # pickle files
 *.pkl
 
-# datafiles
-train.csv
-test.csv
+
