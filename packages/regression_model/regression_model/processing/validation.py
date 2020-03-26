@@ -1,30 +1,28 @@
-import pandas as pd
-from sklearn.externals import joblib
-from sklearn.pipeline import Pipeline
-
 from regression_model.config import config
 
-
-def load_dataset(*, file_name: str
-                 ) -> pd.DataFrame:
-    _data = pd.read_csv(f'{config.DATASET_DIR}/{file_name}')
-    return _data
+import pandas as pd
 
 
-def save_pipeline(*, pipeline_to_persist) -> None:
-    """Persist the pipeline."""
+def validate_inputs(input_data: pd.DataFrame) -> pd.DataFrame:
+    """Check model inputs for unprocessable values."""
 
-    save_file_name = 'regression_model.pkl'
-    save_path = config.TRAINED_MODEL_DIR / save_file_name
-    joblib.dump(pipeline_to_persist, save_path)
+    validated_data = input_data.copy()
 
-    print('saved pipeline')
+    # check for numerical variables with NA not seen during training
+    if input_data[config.NUMERICAL_NA_NOT_ALLOWED].isnull().any().any():
+        validated_data = validated_data.dropna(
+            axis=0, subset=config.NUMERICAL_NA_NOT_ALLOWED)
 
+    # check for categorical variables with NA not seen during training
+    if input_data[config.CATEGORICAL_NA_NOT_ALLOWED].isnull().any().any():
+        validated_data = validated_data.dropna(
+            axis=0, subset=config.CATEGORICAL_NA_NOT_ALLOWED)
 
-def load_pipeline(*, file_name: str
-                  ) -> Pipeline:
-    """Load a persisted pipeline."""
+    # check for values <= 0 for the log transformed variables
+    if (input_data[config.NUMERICALS_LOG_VARS] <= 0).any().any():
+        vars_with_neg_values = config.NUMERICALS_LOG_VARS[
+            (input_data[config.NUMERICALS_LOG_VARS] <= 0).any()]
+        validated_data = validated_data[
+            validated_data[vars_with_neg_values] > 0]
 
-    file_path = config.TRAINED_MODEL_DIR / file_name
-    saved_pipeline = joblib.load(filename=file_path)
-    return saved_pipeline
+    return validated_data
