@@ -2,13 +2,10 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 from regression_model import pipeline
-#import pipeline
-
 from regression_model.processing.data_management import (
-#from processing.data_management import ( 
- load_dataset, save_pipeline)
+    load_dataset, save_pipeline)
 from regression_model.config import config
-#from config import config
+
 
 def run_training() -> None:
     """Train the model."""
@@ -31,11 +28,7 @@ def run_training() -> None:
                             y_train)
 
     save_pipeline(pipeline_to_persist=pipeline.price_pipe)
-	
-	
-	
 
 
 if __name__ == '__main__':
     run_training()
-	
